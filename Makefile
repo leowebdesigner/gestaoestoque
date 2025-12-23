@@ -1,4 +1,4 @@
-.PHONY: up down build bash artisan migrate seed test queue schedule logs cache-clear init
+.PHONY: up down build bash migrate seed test queue schedule logs cache-clear init
 
 up:
 	docker compose up -d --build
@@ -11,9 +11,6 @@ build:
 
 bash:
 	docker compose exec app bash
-
-artisan:
-	docker compose exec app php artisan $(filter-out $@,$(MAKECMDGOALS))
 
 migrate:
 	docker compose exec app php artisan migrate
@@ -38,6 +35,3 @@ cache-clear:
 
 init:
 	docker compose run --rm --entrypoint "" app composer create-project laravel/laravel .
-
-%:
-	@:
