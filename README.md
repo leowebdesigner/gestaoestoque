@@ -1,27 +1,42 @@
 # CPlug ERP - API de Estoque e Vendas
 
-API REST de controle de estoque e vendas para um ERP.
+API REST para controle de estoque e vendas em ERP
 
 ## Requisitos
 - Docker e Docker Compose
 - Make
 
-## Subindo o ambiente
-Tudo roda dentro do Docker. Um comando para subir:
+## Subindo do zero (passo a passo)
 
+1) Build e subir containers
 ```bash
 make up
 ```
 
-Primeira vez (somente se ainda nao tiver criado o projeto):
-
+2) Rodar migrations
 ```bash
-make init
+make migrate
+```
+
+3) Rodar seed (produtos e usuario de teste)
+```bash
+make seed
+```
+
+4) (Opcional) Rodar testes
+```bash
+make test
+```
+
+5) (Opcional) Subir Swagger UI
+```bash
+make swagger
 ```
 
 ## URLs
 - API: `http://localhost:8000`
 - Horizon: `http://localhost:8000/horizon`
+- Swagger UI: `http://localhost:8081`
 - Adminer (DB): `http://localhost:8080`
 
 ## Credenciais do banco
@@ -31,11 +46,11 @@ make init
 - User: `cplug`
 - Password: `cplug`
 
-No Adminer, use Host `mysql`, User `cplug`, Password `cplug`, Database `cplug`.
+## Usuario de teste
+- Email: `test@example.com`
+- Password: `password`
 
 ## Comandos Make
-Comandos principais:
-
 ```bash
 make up
 make down
@@ -48,29 +63,30 @@ make queue
 make schedule
 make logs
 make cache-clear
+make swagger
 ```
 
-## Fila e agendador
-Containers dedicados:
-- `queue`: worker de filas com Redis
-- `scheduler`: `schedule:work` rodando comandos agendados
-  - Usamos Horizon para monitoramento e execucao das filas.
-
-## Endpoints previstos
+## Endpoints
+- POST `/api/auth/login`
+- POST `/api/auth/logout`
 - POST `/api/inventory`
 - GET `/api/inventory`
 - POST `/api/sales`
 - GET `/api/sales/{id}`
 - GET `/api/reports/sales`
 
-## Documentacao (OpenAPI)
-- `docs/openapi.yaml`
+## Documentacao
+- OpenAPI: `docs/openapi.yaml`
+- Postman:
+  - `docs/postman/CPlug.postman_collection.json`
+  - `docs/postman/CPlug.postman_environment.json`
 
-## Postman
-- Collection: `docs/postman/CPlug.postman_collection.json`
-- Environment: `docs/postman/CPlug.postman_environment.json`
+## Fila e agendador
+Containers dedicados:
+- `queue`: Horizon + Redis
+- `scheduler`: `schedule:work`
 
 ## Observacoes
-- `.env` e `.env.example` ja configurados para MySQL + Redis.
-- Session e cache em Redis.
-- Horizon esta liberado em ambiente local via `HORIZON_MIDDLEWARE=web`.
+- `.env` e `.env.example` configurados para MySQL + Redis.
+- Cache e session em Redis.
+- Horizon liberado em ambiente local via `HORIZON_MIDDLEWARE=web`.
