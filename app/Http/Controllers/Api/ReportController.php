@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SalesReportRequest;
 use App\Http\Resources\SaleResource;
 use App\Services\ReportService;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class ReportController extends Controller
 {
@@ -14,10 +14,12 @@ class ReportController extends Controller
         private readonly ReportService $service
     ) {}
 
-    public function sales(SalesReportRequest $request): AnonymousResourceCollection
+    public function sales(SalesReportRequest $request): JsonResponse
     {
         $sales = $this->service->getSalesReport($request->validated());
 
-        return SaleResource::collection($sales);
+        $resource = SaleResource::collection($sales)->resolve();
+
+        return $this->success($resource);
     }
 }

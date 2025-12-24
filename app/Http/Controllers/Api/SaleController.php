@@ -8,6 +8,7 @@ use App\Http\Resources\SaleResource;
 use App\Services\SaleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
@@ -19,12 +20,12 @@ class SaleController extends Controller
     {
         $sale = $this->service->createSale($request->validated());
 
-        return (new SaleResource($sale))
-            ->response()
-            ->setStatusCode(202);
+        $resource = (new SaleResource($sale))->toArray($request);
+
+        return $this->success($resource, 'Accepted.', 202);
     }
 
-    public function show(int $id): SaleResource
+    public function show(int $id, Request $request): JsonResponse
     {
         $sale = $this->service->getSaleById($id);
 
@@ -32,6 +33,8 @@ class SaleController extends Controller
             throw new ModelNotFoundException('Sale not found.');
         }
 
-        return new SaleResource($sale);
+        $resource = (new SaleResource($sale))->toArray($request);
+
+        return $this->success($resource);
     }
 }

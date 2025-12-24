@@ -7,6 +7,8 @@ use App\Http\Requests\InventoryStoreRequest;
 use App\Http\Resources\InventoryItemResource;
 use App\Http\Resources\InventorySummaryResource;
 use App\Services\InventoryService;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class InventoryController extends Controller
 {
@@ -14,18 +16,22 @@ class InventoryController extends Controller
         private readonly InventoryService $service
     ) {}
 
-    public function store(InventoryStoreRequest $request): InventoryItemResource
+    public function store(InventoryStoreRequest $request): JsonResponse
     {
         $inventory = $this->service->addStock($request->validated());
         $inventory->load('product');
 
-        return new InventoryItemResource($inventory);
+        $resource = (new InventoryItemResource($inventory))->toArray($request);
+
+        return $this->success($resource, 'Created.', 201);
     }
 
-    public function index(): InventorySummaryResource
+    public function index(Request $request): JsonResponse
     {
         $summary = $this->service->getInventorySummary();
 
-        return new InventorySummaryResource($summary);
+        $resource = (new InventorySummaryResource($summary))->toArray($request);
+
+        return $this->success($resource);
     }
 }

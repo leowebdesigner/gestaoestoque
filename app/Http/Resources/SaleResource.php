@@ -16,7 +16,9 @@ class SaleResource extends JsonResource
             'total_profit' => $this->total_profit,
             'status' => $this->status,
             'created_at' => $this->created_at,
-            'items' => SaleItemResource::collection($this->whenLoaded('items')),
+            'items' => $this->whenLoaded('items', function () {
+                return SaleItemResource::collection($this->items);
+            }),
         ];
     }
 }
