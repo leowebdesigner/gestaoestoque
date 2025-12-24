@@ -13,7 +13,7 @@ bash:
 	docker compose exec app bash
 
 migrate:
-	docker compose exec app sh -lc 'while [ ! -f /var/www/html/vendor/autoload.php ]; do sleep 2; done; php artisan migrate'
+	docker compose exec app sh -lc 'while [ ! -f /var/www/html/vendor/autoload.php ]; do sleep 2; done; while ! php -r "new PDO(\"mysql:host=mysql;port=3306;dbname=cplug\", \"cplug\", \"cplug\");" >/dev/null 2>&1; do sleep 2; done; while ! curl -fsS http://localhost:8000/health >/dev/null 2>&1; do sleep 2; done; php artisan migrate'
 
 seed:
 	docker compose exec app php artisan db:seed
