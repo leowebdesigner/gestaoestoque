@@ -50,4 +50,12 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         return $inventory;
     }
+
+    public function deleteStale(\DateTimeInterface $threshold): int
+    {
+        return Inventory::query()
+            ->whereNotNull('last_updated')
+            ->where('last_updated', '<', $threshold)
+            ->delete();
+    }
 }

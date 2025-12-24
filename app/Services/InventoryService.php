@@ -81,4 +81,16 @@ class InventoryService
             ];
         });
     }
+
+    public function cleanupOldStock(int $days): int
+    {
+        $threshold = Carbon::now()->subDays($days);
+        $deleted = $this->inventoryRepository->deleteStale($threshold);
+
+        if ($deleted > 0) {
+            Cache::forget(self::CACHE_KEY);
+        }
+
+        return $deleted;
+    }
 }
