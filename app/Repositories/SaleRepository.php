@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\SaleRepositoryInterface;
 use App\Models\Sale;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SaleRepository implements SaleRepositoryInterface
 {
@@ -33,7 +33,7 @@ class SaleRepository implements SaleRepositoryInterface
         return $sale;
     }
 
-    public function getSalesReport(array $filters): Collection
+    public function getSalesReport(array $filters, int $perPage = 50): LengthAwarePaginator
     {
         $query = Sale::query()
             ->select([
@@ -48,6 +48,6 @@ class SaleRepository implements SaleRepositoryInterface
             ->betweenDates($filters['start_date'] ?? null, $filters['end_date'] ?? null)
             ->withProductSku($filters['product_sku'] ?? null);
 
-        return $query->get();
+        return $query->paginate($perPage);
     }
 }

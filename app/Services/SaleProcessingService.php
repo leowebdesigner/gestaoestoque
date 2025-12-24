@@ -96,14 +96,14 @@ class SaleProcessingService implements SaleProcessingServiceInterface
 
             Cache::forget('inventory:summary');
 
-            $this->saleRepository->update($sale, [
+            $this->saleRepository->update($lockedSale, [
                 'total_amount' => bcdiv((string) $totalAmountCents, '100', 2),
                 'total_cost' => bcdiv((string) $totalCostCents, '100', 2),
                 'total_profit' => bcdiv((string) ($totalAmountCents - $totalCostCents), '100', 2),
                 'status' => SaleStatus::Completed,
             ]);
 
-            event(new SaleFinalized($sale->refresh()));
+            event(new SaleFinalized($lockedSale->refresh()));
         });
     }
 }
