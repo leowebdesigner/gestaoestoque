@@ -8,33 +8,40 @@ API REST para controle de estoque e vendas em ERP
 
 ## Subindo do zero (passo a passo)
 
+Ao subir pela primeira vez o docker irá buildar e instalar todas as dependências, portanto o primeiro passo pode demorar mais.
+
 1) Copiar o arquivo de ambiente
 ```bash
 cp .env.example .env 
 ```
 após por favor recarregue o env digitando comando cd . no terminal
 
-2) Build e subir containers
+2) Build das imagens
+```bash
+make build
+```
+
+3) Subir containers
 ```bash
 make up
 ```
 
-3) Rodar migrations
+4) Rodar migrations
 ```bash
 make migrate
 ```
 
-4) Rodar seed (produtos e usuario de teste)
+5) Rodar seed (produtos e usuario de teste)
 ```bash
 make seed
 ```
 
-5) (Opcional) Rodar testes
+6) (Opcional) Rodar testes
 ```bash
 make test
 ```
 
-6) (Opcional) Subir Swagger UI
+7) (Opcional) Subir Swagger UI
 ```bash
 make swagger
 ```

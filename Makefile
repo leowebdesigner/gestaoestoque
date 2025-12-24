@@ -1,7 +1,7 @@
 .PHONY: up down build bash migrate seed test queue schedule logs cache-clear init swagger
 
 up:
-	docker compose up -d --build
+	docker compose up -d
 
 down:
 	docker compose down
