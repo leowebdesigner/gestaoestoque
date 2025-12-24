@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Contracts\Repositories\SaleRepositoryInterface;
+use App\Contracts\Services\SaleProcessingServiceInterface;
 use App\Enums\SaleStatus;
-use App\Services\SaleProcessingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,12 +16,16 @@ class ProcessSaleJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+    public int $timeout = 60;
+    public int $backoff = 10;
+
     public function __construct(
         public readonly int $saleId,
         public readonly array $items
     ) {}
 
-    public function handle(SaleProcessingService $service): void
+    public function handle(SaleProcessingServiceInterface $service): void
     {
         $service->process($this->saleId, $this->items);
     }
@@ -34,12 +38,14 @@ class ProcessSaleJob implements ShouldQueue
         if ($sale) {
             $saleRepository->update($sale, [
                 'status' => SaleStatus::Failed,
+                'failure_reason' => mb_substr($exception->getMessage(), 0, 1000),
             ]);
         }
 
         Log::error('Sale processing failed', [
             'sale_id' => $this->saleId,
             'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
         ]);
     }
 }
