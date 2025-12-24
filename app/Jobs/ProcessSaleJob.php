@@ -6,8 +6,9 @@ use App\Contracts\Repositories\InventoryRepositoryInterface;
 use App\Contracts\Repositories\ProductRepositoryInterface;
 use App\Contracts\Repositories\SaleItemRepositoryInterface;
 use App\Contracts\Repositories\SaleRepositoryInterface;
+use App\Enums\SaleStatus;
 use App\Events\SaleFinalized;
-use App\Models\Sale;
+use App\Exceptions\InsufficientStockException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -61,15 +62,15 @@ class ProcessSaleJob implements ShouldQueue
                     throw new ModelNotFoundException('Product not found.');
                 }
 
+                $qty = (int) $item['quantity'];
                 $inventory = $inventories->get($item['product_id']);
 
-                if (!$inventory || $inventory->quantity < $item['quantity']) {
-                    throw new ModelNotFoundException('Insufficient stock.');
+                if (!$inventory || $inventory->quantity < $qty) {
+                    throw new InsufficientStockException($product->sku, $qty);
                 }
 
                 $unitPrice = (float) $product->sale_price;
                 $unitCost = (float) $product->cost_price;
-                $qty = (int) $item['quantity'];
 
                 $totalAmount += $unitPrice * $qty;
                 $totalCost += $unitCost * $qty;
@@ -93,7 +94,7 @@ class ProcessSaleJob implements ShouldQueue
                 'total_amount' => $totalAmount,
                 'total_cost' => $totalCost,
                 'total_profit' => $totalAmount - $totalCost,
-                'status' => 'completed',
+                'status' => SaleStatus::Completed,
             ]);
 
             event(new SaleFinalized($sale->refresh()));
@@ -102,11 +103,12 @@ class ProcessSaleJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        $sale = Sale::query()->find($this->saleId);
+        $saleRepository = app()->make(SaleRepositoryInterface::class);
+        $sale = $saleRepository->findById($this->saleId);
 
         if ($sale) {
-            $sale->update([
-                'status' => 'failed',
+            $saleRepository->update($sale, [
+                'status' => SaleStatus::Failed,
             ]);
         }
 
