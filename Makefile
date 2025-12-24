@@ -1,4 +1,4 @@
-.PHONY: up down build bash migrate seed test queue schedule logs cache-clear init
+.PHONY: up down build bash migrate seed test queue schedule logs cache-clear init swagger
 
 up:
 	docker compose up -d --build
@@ -32,6 +32,9 @@ logs:
 
 cache-clear:
 	docker compose exec app php artisan cache:clear
+
+swagger:
+	docker compose up -d swagger
 
 init:
 	docker compose run --rm --entrypoint "" app composer create-project laravel/laravel .
