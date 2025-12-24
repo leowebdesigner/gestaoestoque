@@ -48,18 +48,13 @@ class ProcessSaleJobTest extends TestCase
             ['product_id' => $product->id, 'quantity' => 2],
         ]);
 
-        $job->handle(
-            app(SaleRepositoryInterface::class),
-            app(SaleItemRepositoryInterface::class),
-            app(InventoryRepositoryInterface::class),
-            app(ProductRepositoryInterface::class)
-        );
+        $job->handle(app(\App\Services\SaleProcessingService::class));
 
         $inventory->refresh();
         $sale->refresh();
 
         $this->assertSame(2, $inventory->quantity);
-        $this->assertSame('completed', $sale->status);
+        $this->assertSame('completed', $sale->status->value);
         $this->assertSame('50.00', $sale->total_amount);
         $this->assertSame('20.00', $sale->total_cost);
 

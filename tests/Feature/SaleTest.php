@@ -51,7 +51,7 @@ class SaleTest extends TestCase
         $saleId = $response->json('data.id');
         $sale = \App\Models\Sale::query()->findOrFail($saleId);
 
-        $this->assertSame('completed', $sale->status);
+        $this->assertSame('completed', $sale->status->value);
         $this->assertSame('40.00', $sale->total_amount);
         $this->assertSame('20.00', $sale->total_cost);
     }
