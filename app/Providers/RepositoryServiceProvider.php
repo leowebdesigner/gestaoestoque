@@ -6,10 +6,12 @@ use App\Contracts\Repositories\InventoryRepositoryInterface;
 use App\Contracts\Repositories\ProductRepositoryInterface;
 use App\Contracts\Repositories\SaleItemRepositoryInterface;
 use App\Contracts\Repositories\SaleRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Repositories\InventoryRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\SaleItemRepository;
 use App\Repositories\SaleRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -20,5 +22,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(SaleItemRepositoryInterface::class, SaleItemRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 }
