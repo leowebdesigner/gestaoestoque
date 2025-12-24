@@ -46,7 +46,7 @@ make swagger
 - User: `cplug`
 - Password: `cplug`
 
-## Usuario de teste
+## Usuário de teste
 - Email: `test@example.com`
 - Password: `password`
 
@@ -75,7 +75,7 @@ make swagger
 - GET `/api/sales/{id}`
 - GET `/api/reports/sales`
 
-## Documentacao
+## Documentação
 - OpenAPI: `docs/openapi.yaml`
 - Postman:
   - `docs/postman/CPlug.postman_collection.json`
@@ -87,7 +87,7 @@ Containers dedicados:
 - `queue`: Horizon + Redis
 - `scheduler`: `schedule:work`
 
-## Observacoes
+## Observações
 - `.env` e `.env.example` configurados para MySQL + Redis.
 - Cache e session em Redis.
 - Horizon liberado em ambiente local via `HORIZON_MIDDLEWARE=web`.

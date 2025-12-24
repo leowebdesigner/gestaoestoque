@@ -16,9 +16,13 @@ class ReportController extends Controller
 
     public function sales(SalesReportRequest $request): JsonResponse
     {
-        $sales = $this->service->getSalesReport($request->validated());
+        $filters = $request->validated();
+        $perPage = (int) ($filters['per_page'] ?? 50);
+        unset($filters['per_page']);
 
-        $resource = SaleResource::collection($sales)->resolve();
+        $sales = $this->service->getSalesReport($filters, $perPage);
+
+        $resource = SaleResource::collection($sales)->response()->getData(true);
 
         return $this->success($resource);
     }

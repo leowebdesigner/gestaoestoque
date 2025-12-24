@@ -3,7 +3,7 @@
 namespace App\Contracts\Repositories;
 
 use App\Models\Sale;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface SaleRepositoryInterface
 {
@@ -15,5 +15,5 @@ interface SaleRepositoryInterface
 
     public function update(Sale $sale, array $data): Sale;
 
-    public function getSalesReport(array $filters): Collection;
+    public function getSalesReport(array $filters, int $perPage = 50): LengthAwarePaginator;
 }

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\SaleRepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ReportService
 {
@@ -11,8 +11,8 @@ class ReportService
         private readonly SaleRepositoryInterface $saleRepository
     ) {}
 
-    public function getSalesReport(array $filters): Collection
+    public function getSalesReport(array $filters, int $perPage = 50): LengthAwarePaginator
     {
-        return $this->saleRepository->getSalesReport($filters);
+        return $this->saleRepository->getSalesReport($filters, $perPage);
     }
 }
