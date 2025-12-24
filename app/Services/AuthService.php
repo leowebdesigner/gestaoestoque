@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -10,9 +11,15 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthService
 {
+    private const TOKEN_TTL_DAYS = 7;
+
+    public function __construct(
+        private readonly UserRepositoryInterface $userRepository
+    ) {}
+
     public function login(string $email, string $password): array
     {
-        $user = User::query()->where('email', $email)->first();
+        $user = $this->userRepository->findByEmail($email);
 
         if (!$user || !Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
@@ -35,7 +42,7 @@ class AuthService
         }
 
         $token = $user->createToken('postman')->plainTextToken;
-        Cache::forever($cacheKey, $token);
+        Cache::put($cacheKey, $token, now()->addDays(self::TOKEN_TTL_DAYS));
 
         return [
             'token' => $token,
@@ -46,6 +53,7 @@ class AuthService
     public function logout(?User $user): void
     {
         if ($user && $user->currentAccessToken()) {
+            Cache::forget('auth:token:user:' . $user->id);
             $user->currentAccessToken()->delete();
         }
     }

@@ -54,8 +54,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function deleteStale(\DateTimeInterface $threshold): int
     {
         return Inventory::query()
-            ->whereNotNull('last_updated')
-            ->where('last_updated', '<', $threshold)
+            ->updatedBefore($threshold)
             ->delete();
     }
 }

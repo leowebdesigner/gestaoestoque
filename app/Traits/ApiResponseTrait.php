@@ -15,6 +15,21 @@ trait ApiResponseTrait
         ], $status);
     }
 
+    protected function created(array $data = [], string $message = 'Created.'): JsonResponse
+    {
+        return $this->success($data, $message, 201);
+    }
+
+    protected function accepted(array $data = [], string $message = 'Accepted.'): JsonResponse
+    {
+        return $this->success($data, $message, 202);
+    }
+
+    protected function noContent(): JsonResponse
+    {
+        return response()->json([], 204);
+    }
+
     protected function error(string $message, int $status, array $errors = []): JsonResponse
     {
         return response()->json([

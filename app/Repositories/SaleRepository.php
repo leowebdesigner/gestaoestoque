@@ -44,21 +44,9 @@ class SaleRepository implements SaleRepositoryInterface
                 'sales.status',
                 'sales.created_at',
             ])
-            ->with(['items.product:id,sku,name']);
-
-        if (!empty($filters['start_date'])) {
-            $query->whereDate('sales.created_at', '>=', $filters['start_date']);
-        }
-
-        if (!empty($filters['end_date'])) {
-            $query->whereDate('sales.created_at', '<=', $filters['end_date']);
-        }
-
-        if (!empty($filters['product_sku'])) {
-            $query->whereHas('items.product', function ($builder) use ($filters): void {
-                $builder->where('sku', $filters['product_sku']);
-            });
-        }
+            ->with(['items.product:id,sku,name'])
+            ->betweenDates($filters['start_date'] ?? null, $filters['end_date'] ?? null)
+            ->withProductSku($filters['product_sku'] ?? null);
 
         return $query->get();
     }

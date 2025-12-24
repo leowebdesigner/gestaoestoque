@@ -15,7 +15,7 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function findBySku(string $sku): ?Product
     {
-        return Product::query()->where('sku', $sku)->first();
+        return Product::query()->bySku($sku)->first();
     }
 
     public function getByIds(array $ids): Collection

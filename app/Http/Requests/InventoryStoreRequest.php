@@ -2,10 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Product;
-use App\Support\Money;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class InventoryStoreRequest extends FormRequest
 {
@@ -21,26 +18,5 @@ class InventoryStoreRequest extends FormRequest
             'quantity' => ['required', 'integer', 'min:1'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],
         ];
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            $costPrice = $this->input('cost_price');
-
-            if ($costPrice === null) {
-                return;
-            }
-
-            $product = Product::query()->where('sku', $this->input('sku'))->first();
-
-            if (!$product) {
-                return;
-            }
-
-            if (Money::toCents($costPrice) > Money::toCents($product->sale_price)) {
-                $validator->errors()->add('cost_price', 'Cost price cannot be greater than sale price.');
-            }
-        });
     }
 }
