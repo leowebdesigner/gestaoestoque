@@ -6,12 +6,7 @@ class Money
 {
     public static function toCents(string|int|float $value): int
     {
-        $parts = explode('.', (string) $value, 2);
-        $intPart = (int) $parts[0];
-        $decPart = $parts[1] ?? '0';
-        $decPart = substr(str_pad($decPart, 2, '0'), 0, 2);
-
-        return ($intPart * 100) + (int) $decPart;
+        return (int) bcmul((string) $value, '100', 0);
     }
 
     public static function formatBrl(string|int|float $value): string
