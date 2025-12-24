@@ -15,7 +15,7 @@ class SaleResource extends JsonResource
             'total_amount' => Money::formatBrl($this->total_amount),
             'total_cost' => Money::formatBrl($this->total_cost),
             'total_profit' => Money::formatBrl($this->total_profit),
-            'status' => $this->status,
+            'status' => $this->status?->value,
             'created_at' => $this->created_at,
             'items' => $this->whenLoaded('items', function () {
                 return SaleItemResource::collection($this->items);

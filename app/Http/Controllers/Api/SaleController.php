@@ -22,7 +22,7 @@ class SaleController extends Controller
 
         return $this->accepted([
             'id' => $sale->id,
-            'status' => $sale->status,
+            'status' => $sale->status->value,
         ]);
     }
 

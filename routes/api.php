@@ -13,8 +13,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/inventory', [InventoryController::class, 'store']);
     Route::get('/inventory', [InventoryController::class, 'index']);
 
-    Route::post('/sales', [SaleController::class, 'store']);
-Route::get('/sales/{id}', [SaleController::class, 'show'])->whereNumber('id');
+    Route::post('/sales', [SaleController::class, 'store'])->middleware('throttle:30,1');
+    Route::get('/sales/{id}', [SaleController::class, 'show'])->whereNumber('id');
 
     Route::get('/reports/sales', [ReportController::class, 'sales']);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\Services\SaleProcessingServiceInterface;
 use App\Contracts\Repositories\InventoryRepositoryInterface;
 use App\Contracts\Repositories\ProductRepositoryInterface;
 use App\Contracts\Repositories\SaleItemRepositoryInterface;
@@ -9,11 +10,14 @@ use App\Contracts\Repositories\SaleRepositoryInterface;
 use App\Enums\SaleStatus;
 use App\Events\SaleFinalized;
 use App\Exceptions\InsufficientStockException;
+use App\Models\Sale;
+use App\Support\Money;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class SaleProcessingService
+class SaleProcessingService implements SaleProcessingServiceInterface
 {
     public function __construct(
         private readonly SaleRepositoryInterface $saleRepository,
@@ -24,11 +28,24 @@ class SaleProcessingService
 
     public function process(int $saleId, array $items): void
     {
-        DB::transaction(function () use ($saleId, $items): void {
-            $sale = $this->saleRepository->findById($saleId);
+        $sale = $this->saleRepository->findById($saleId);
 
-            if (!$sale) {
-                throw new ModelNotFoundException('Sale not found.');
+        if (!$sale) {
+            throw new ModelNotFoundException('Sale not found.');
+        }
+
+        if ($sale->status !== SaleStatus::Pending) {
+            return;
+        }
+
+        DB::transaction(function () use ($sale, $items): void {
+            $lockedSale = Sale::query()
+                ->where('id', $sale->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$lockedSale || $lockedSale->status !== SaleStatus::Pending) {
+                return;
             }
 
             $productIds = array_unique(array_column($items, 'product_id'));
@@ -38,8 +55,8 @@ class SaleProcessingService
                 ->keyBy('product_id');
 
             $rows = [];
-            $totalAmount = 0.0;
-            $totalCost = 0.0;
+            $totalAmountCents = 0;
+            $totalCostCents = 0;
             $now = Carbon::now();
 
             foreach ($items as $item) {
@@ -56,17 +73,17 @@ class SaleProcessingService
                     throw new InsufficientStockException($product->sku, $qty);
                 }
 
-                $unitPrice = (float) $product->sale_price;
-                $unitCost = (float) $product->cost_price;
+                $unitPriceCents = Money::toCents($product->sale_price);
+                $unitCostCents = Money::toCents($product->cost_price);
 
-                $totalAmount += $unitPrice * $qty;
-                $totalCost += $unitCost * $qty;
+                $totalAmountCents += $unitPriceCents * $qty;
+                $totalCostCents += $unitCostCents * $qty;
 
                 $rows[] = [
                     'product_id' => $product->id,
                     'quantity' => $qty,
-                    'unit_price' => $unitPrice,
-                    'unit_cost' => $unitCost,
+                    'unit_price' => bcdiv((string) $unitPriceCents, '100', 2),
+                    'unit_cost' => bcdiv((string) $unitCostCents, '100', 2),
                 ];
 
                 $this->inventoryRepository->update($inventory, [
@@ -77,10 +94,12 @@ class SaleProcessingService
 
             $this->saleItemRepository->createMany($sale->id, $rows);
 
+            Cache::forget('inventory:summary');
+
             $this->saleRepository->update($sale, [
-                'total_amount' => $totalAmount,
-                'total_cost' => $totalCost,
-                'total_profit' => $totalAmount - $totalCost,
+                'total_amount' => bcdiv((string) $totalAmountCents, '100', 2),
+                'total_cost' => bcdiv((string) $totalCostCents, '100', 2),
+                'total_profit' => bcdiv((string) ($totalAmountCents - $totalCostCents), '100', 2),
                 'status' => SaleStatus::Completed,
             ]);
 

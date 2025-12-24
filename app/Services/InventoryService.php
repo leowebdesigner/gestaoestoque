@@ -43,33 +43,24 @@ class InventoryService
                 ]);
             }
 
-            $inventory = $this->inventoryRepository->findByProductId($product->id);
             $now = Carbon::now();
+            $existingInventory = $this->inventoryRepository->findByProductId($product->id);
 
-            if ($inventory) {
-                $updated = $this->inventoryRepository->update($inventory, [
-                    'quantity' => $inventory->quantity + $payload['quantity'],
+            $inventory = $existingInventory
+                ? $this->inventoryRepository->update($existingInventory, [
+                    'quantity' => $existingInventory->quantity + $payload['quantity'],
+                    'last_updated' => $now,
+                ])
+                : $this->inventoryRepository->create([
+                    'product_id' => $product->id,
+                    'quantity' => $payload['quantity'],
                     'last_updated' => $now,
                 ]);
 
-                Cache::forget(self::CACHE_KEY);
-
-                $updated->load('product');
-
-                return $updated;
-            }
-
-            $created = $this->inventoryRepository->create([
-                'product_id' => $product->id,
-                'quantity' => $payload['quantity'],
-                'last_updated' => $now,
-            ]);
-
             Cache::forget(self::CACHE_KEY);
+            $inventory->load('product');
 
-            $created->load('product');
-
-            return $created;
+            return $inventory;
         });
     }
 
