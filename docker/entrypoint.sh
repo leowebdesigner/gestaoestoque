@@ -1,47 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ ! -f /var/www/html/artisan ]; then
-  echo "Laravel not found. Please bootstrap the project with: make init"
-  exit 1
+cd /var/www/html
+
+# Criar .env se não existir
+if [ ! -f .env ]; then
+  cp .env.example .env 2>/dev/null || true
 fi
 
-if [ "${RUN_COMPOSER_INSTALL:-1}" = "1" ]; then
-  if [ ! -f /var/www/html/vendor/autoload.php ]; then
-    git config --global --add safe.directory /var/www/html || true
-    lock_dir="/var/www/html/.composer-install.lock"
-    if mkdir "$lock_dir" 2>/dev/null; then
-      trap 'rmdir "$lock_dir"' EXIT
-      if [ ! -f /var/www/html/vendor/autoload.php ]; then
-        composer install --no-interaction --prefer-dist
-      fi
-      rmdir "$lock_dir"
-      trap - EXIT
-    else
-      echo "Waiting for composer install lock..."
-      while [ -d "$lock_dir" ]; do
-        sleep 2
-      done
-      if [ ! -f /var/www/html/vendor/autoload.php ]; then
-        composer install --no-interaction --prefer-dist
-      fi
-    fi
-  fi
-else
-  echo "Waiting for vendor/autoload.php..."
-  while [ ! -f /var/www/html/vendor/autoload.php ]; do
-    sleep 2
-  done
+# Gerar APP_KEY se não existir
+if [ -f .env ] && ! grep -q "^APP_KEY=base64:" .env; then
+  php artisan key:generate --force 2>/dev/null || true
 fi
 
-if [ "${RUN_APP_BOOTSTRAP:-1}" = "1" ]; then
-  if [ ! -f /var/www/html/.env ]; then
-    cp /var/www/html/.env.example /var/www/html/.env
-  fi
-
-  if ! grep -q "^APP_KEY=" /var/www/html/.env; then
-    php /var/www/html/artisan key:generate --force
-  fi
+# Otimizar para produção (se não for local)
+if [ "${APP_ENV:-local}" != "local" ]; then
+  php artisan config:cache
+  php artisan route:cache
+  php artisan view:cache
 fi
 
 exec "$@"
