@@ -83,7 +83,9 @@ return [
     |
     */
 
-    'middleware' => ['web', 'auth:sanctum'],
+    'middleware' => array_filter(
+        explode(',', env('HORIZON_MIDDLEWARE', 'web'))
+    ),
 
     /*
     |--------------------------------------------------------------------------

@@ -73,3 +73,4 @@ Containers dedicados:
 ## Observacoes
 - `.env` e `.env.example` ja configurados para MySQL + Redis.
 - Session e cache em Redis.
+- Horizon esta liberado em ambiente local via `HORIZON_MIDDLEWARE=web`.
