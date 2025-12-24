@@ -47,6 +47,10 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        Product::query()->upsert($products, ['sku']);
+        Product::query()->upsert(
+            $products,
+            ['sku'],
+            ['name', 'description', 'cost_price', 'sale_price']
+        );
     }
 }
