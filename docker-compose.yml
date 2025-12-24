@@ -11,6 +11,8 @@ services:
       - "8000:8000"
     environment:
       APP_ENV: local
+      RUN_COMPOSER_INSTALL: "1"
+      RUN_APP_BOOTSTRAP: "1"
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
@@ -36,6 +38,9 @@ services:
     depends_on:
       - mysql
       - redis
+    environment:
+      RUN_COMPOSER_INSTALL: "0"
+      RUN_APP_BOOTSTRAP: "0"
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "horizon"]
 
@@ -50,6 +55,9 @@ services:
     depends_on:
       - mysql
       - redis
+    environment:
+      RUN_COMPOSER_INSTALL: "0"
+      RUN_APP_BOOTSTRAP: "0"
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "schedule:work"]
 
