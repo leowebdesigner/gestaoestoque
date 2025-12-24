@@ -20,10 +20,10 @@ class SaleController extends Controller
     {
         $sale = $this->service->createSale($request->validated());
 
-        return $this->success([
+        return $this->accepted([
             'id' => $sale->id,
             'status' => $sale->status,
-        ], 'Accepted.', 202);
+        ]);
     }
 
     public function show(int $id, Request $request): JsonResponse

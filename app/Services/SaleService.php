@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\SaleRepositoryInterface;
+use App\Enums\SaleStatus;
 use App\Jobs\ProcessSaleJob;
 use App\Models\Sale;
 
@@ -18,7 +19,7 @@ class SaleService
             'total_amount' => 0,
             'total_cost' => 0,
             'total_profit' => 0,
-            'status' => 'pending',
+            'status' => SaleStatus::Pending,
         ]);
 
         ProcessSaleJob::dispatch($sale->id, $payload['items']);

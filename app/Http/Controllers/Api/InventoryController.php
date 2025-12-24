@@ -19,11 +19,10 @@ class InventoryController extends Controller
     public function store(InventoryStoreRequest $request): JsonResponse
     {
         $inventory = $this->service->addStock($request->validated());
-        $inventory->load('product');
 
         $resource = (new InventoryItemResource($inventory))->toArray($request);
 
-        return $this->success($resource, 'Created.', 201);
+        return $this->created($resource);
     }
 
     public function index(Request $request): JsonResponse

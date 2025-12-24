@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SaleStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -18,6 +19,7 @@ class Sale extends Model
         'total_amount' => 'decimal:2',
         'total_cost' => 'decimal:2',
         'total_profit' => 'decimal:2',
+        'status' => SaleStatus::class,
     ];
 
     public function items(): HasMany
