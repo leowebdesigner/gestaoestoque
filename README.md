@@ -8,27 +8,32 @@ API REST para controle de estoque e vendas em ERP
 
 ## Subindo do zero (passo a passo)
 
-1) Build e subir containers
+1) Copiar o arquivo de ambiente
+```bash
+cp .env.example .env
+```
+
+2) Build e subir containers
 ```bash
 make up
 ```
 
-2) Rodar migrations
+3) Rodar migrations
 ```bash
 make migrate
 ```
 
-3) Rodar seed (produtos e usuario de teste)
+4) Rodar seed (produtos e usuario de teste)
 ```bash
 make seed
 ```
 
-4) (Opcional) Rodar testes
+5) (Opcional) Rodar testes
 ```bash
 make test
 ```
 
-5) (Opcional) Subir Swagger UI
+6) (Opcional) Subir Swagger UI
 ```bash
 make swagger
 ```
