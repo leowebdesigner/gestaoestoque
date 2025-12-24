@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Repositories\InventoryRepositoryInterface;
 use App\Contracts\Repositories\ProductRepositoryInterface;
 use App\Models\Inventory;
+use App\Support\Money;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -65,19 +66,23 @@ class InventoryService
     {
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL_SECONDS, function (): array {
             $items = $this->inventoryRepository->getWithProducts();
-            $totalAmount = 0.0;
-            $totalCost = 0.0;
+            $totalAmountCents = 0;
+            $totalCostCents = 0;
 
             foreach ($items as $item) {
-                $totalAmount += $item->quantity * (float) $item->product->sale_price;
-                $totalCost += $item->quantity * (float) $item->product->cost_price;
+                $saleCents = Money::toCents($item->product->sale_price);
+                $costCents = Money::toCents($item->product->cost_price);
+                $qty = (int) $item->quantity;
+
+                $totalAmountCents += $saleCents * $qty;
+                $totalCostCents += $costCents * $qty;
             }
 
             return [
                 'items' => $items,
-                'total_amount' => $totalAmount,
-                'total_cost' => $totalCost,
-                'total_profit' => $totalAmount - $totalCost,
+                'total_amount' => Money::formatBrl($totalAmountCents),
+                'total_cost' => Money::formatBrl($totalCostCents),
+                'total_profit' => Money::formatBrl($totalAmountCents - $totalCostCents),
             ];
         });
     }
@@ -93,4 +98,5 @@ class InventoryService
 
         return $deleted;
     }
+
 }

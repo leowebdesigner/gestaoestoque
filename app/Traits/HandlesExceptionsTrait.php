@@ -2,21 +2,21 @@
 
 namespace App\Traits;
 
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
-use Illuminate\Support\Facades\Log;
 
 trait HandlesExceptionsTrait
 {
     use ApiResponseTrait;
 
-    protected function handleException(Request $request, Throwable $exception): JsonResponse
+    public function handleException(Request $request, Throwable $exception): JsonResponse
     {
         Log::error('API exception', [
             'message' => $exception->getMessage(),
@@ -32,8 +32,12 @@ trait HandlesExceptionsTrait
                 $this->error('Forbidden.', 403),
             $exception instanceof ModelNotFoundException =>
                 $this->error('Resource not found.', 404),
-            $exception instanceof HttpExceptionInterface =>
-                $this->error($exception->getMessage() ?: 'HTTP error.', $exception->getStatusCode()),
+            $exception instanceof HttpExceptionInterface => $this->error(
+                $exception->getStatusCode() === 404
+                    ? 'Resource not found.'
+                    : ($exception->getMessage() ?: 'HTTP error.'),
+                $exception->getStatusCode()
+            ),
             default =>
                 $this->error(
                     app()->environment('production') ? 'Unexpected error.' : $exception->getMessage(),

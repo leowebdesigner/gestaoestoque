@@ -56,6 +56,21 @@ Containers dedicados:
 - `scheduler`: `schedule:work` rodando comandos agendados
   - Usamos Horizon para monitoramento e execucao das filas.
 
+## Endpoints previstos
+- POST `/api/inventory`
+- GET `/api/inventory`
+- POST `/api/sales`
+- GET `/api/sales/{id}`
+- GET `/api/reports/sales`
+
+## Documentacao (OpenAPI)
+- `docs/openapi.yaml`
+
+## Postman
+- Collection: `docs/postman/CPlug.postman_collection.json`
+- Environment: `docs/postman/CPlug.postman_environment.json`
+
 ## Observacoes
 - `.env` e `.env.example` ja configurados para MySQL + Redis.
 - Session e cache em Redis.
+- Horizon esta liberado em ambiente local via `HORIZON_MIDDLEWARE=web`.

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,12 +12,14 @@ class SaleResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'total_amount' => $this->total_amount,
-            'total_cost' => $this->total_cost,
-            'total_profit' => $this->total_profit,
+            'total_amount' => Money::formatBrl($this->total_amount),
+            'total_cost' => Money::formatBrl($this->total_cost),
+            'total_profit' => Money::formatBrl($this->total_profit),
             'status' => $this->status,
             'created_at' => $this->created_at,
-            'items' => SaleItemResource::collection($this->whenLoaded('items')),
+            'items' => $this->whenLoaded('items', function () {
+                return SaleItemResource::collection($this->items);
+            }),
         ];
     }
 }

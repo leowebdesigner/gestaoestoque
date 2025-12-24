@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,8 +17,8 @@ class SaleItemResource extends JsonResource
                 'name' => $this->product->name,
             ],
             'quantity' => $this->quantity,
-            'unit_price' => $this->unit_price,
-            'unit_cost' => $this->unit_cost,
+            'unit_price' => Money::formatBrl($this->unit_price),
+            'unit_cost' => Money::formatBrl($this->unit_cost),
         ];
     }
 }
