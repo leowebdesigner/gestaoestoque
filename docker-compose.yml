@@ -37,7 +37,7 @@ services:
       - mysql
       - redis
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
-    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3", "--timeout=90"]
+    command: ["php", "artisan", "horizon"]
 
   scheduler:
     build:
