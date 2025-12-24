@@ -15,5 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (Throwable $exception, $request) {
+            if (!$request->expectsJson() && !$request->is('api/*')) {
+                return null;
+            }
+
+            $handler = new class {
+                use \App\Traits\HandlesExceptionsTrait;
+            };
+
+            return $handler->handleException($request, $exception);
+        });
     })->create();

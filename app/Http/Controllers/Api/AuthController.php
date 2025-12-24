@@ -17,17 +17,15 @@ class AuthController extends Controller
     {
         $payload = $request->validated();
 
-        return response()->json(
-            $this->service->login($payload['email'], $payload['password'])
-        );
+        $token = $this->service->login($payload['email'], $payload['password']);
+
+        return $this->success($token, 'Authenticated.');
     }
 
     public function logout(): JsonResponse
     {
         $this->service->logout(request()->user());
 
-        return response()->json([
-            'message' => 'Logged out.',
-        ]);
+        return $this->success([], 'Logged out.');
     }
 }
