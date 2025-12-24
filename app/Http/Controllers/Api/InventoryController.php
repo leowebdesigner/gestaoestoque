@@ -10,17 +10,21 @@ use App\Services\InventoryService;
 
 class InventoryController extends Controller
 {
-    public function store(InventoryStoreRequest $request, InventoryService $service): InventoryItemResource
+    public function __construct(
+        private readonly InventoryService $service
+    ) {}
+
+    public function store(InventoryStoreRequest $request): InventoryItemResource
     {
-        $inventory = $service->addStock($request->validated());
+        $inventory = $this->service->addStock($request->validated());
         $inventory->load('product');
 
         return new InventoryItemResource($inventory);
     }
 
-    public function index(InventoryService $service): InventorySummaryResource
+    public function index(): InventorySummaryResource
     {
-        $summary = $service->getInventorySummary();
+        $summary = $this->service->getInventorySummary();
 
         return new InventorySummaryResource($summary);
     }
