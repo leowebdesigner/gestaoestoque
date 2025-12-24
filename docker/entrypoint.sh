@@ -6,8 +6,25 @@ if [ ! -f /var/www/html/artisan ]; then
   exit 1
 fi
 
-if [ ! -d /var/www/html/vendor ]; then
-  composer install --no-interaction --prefer-dist
+if [ ! -f /var/www/html/vendor/autoload.php ]; then
+  git config --global --add safe.directory /var/www/html || true
+  lock_dir="/var/www/html/.composer-install.lock"
+  if mkdir "$lock_dir" 2>/dev/null; then
+    trap 'rmdir "$lock_dir"' EXIT
+    if [ ! -f /var/www/html/vendor/autoload.php ]; then
+      composer install --no-interaction --prefer-dist
+    fi
+    rmdir "$lock_dir"
+    trap - EXIT
+  else
+    echo "Waiting for composer install lock..."
+    while [ -d "$lock_dir" ]; do
+      sleep 2
+    done
+    if [ ! -f /var/www/html/vendor/autoload.php ]; then
+      composer install --no-interaction --prefer-dist
+    fi
+  fi
 fi
 
 if [ ! -f /var/www/html/.env ]; then
