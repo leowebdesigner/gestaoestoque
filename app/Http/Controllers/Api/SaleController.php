@@ -11,18 +11,22 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SaleController extends Controller
 {
-    public function store(SaleStoreRequest $request, SaleService $service): JsonResponse
+    public function __construct(
+        private readonly SaleService $service
+    ) {}
+
+    public function store(SaleStoreRequest $request): JsonResponse
     {
-        $sale = $service->createSale($request->validated());
+        $sale = $this->service->createSale($request->validated());
 
         return (new SaleResource($sale))
             ->response()
             ->setStatusCode(202);
     }
 
-    public function show(int $id, SaleService $service): SaleResource
+    public function show(int $id): SaleResource
     {
-        $sale = $service->getSaleById($id);
+        $sale = $this->service->getSaleById($id);
 
         if (!$sale) {
             throw new ModelNotFoundException('Sale not found.');

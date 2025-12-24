@@ -10,9 +10,13 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ReportController extends Controller
 {
-    public function sales(SalesReportRequest $request, ReportService $service): AnonymousResourceCollection
+    public function __construct(
+        private readonly ReportService $service
+    ) {}
+
+    public function sales(SalesReportRequest $request): AnonymousResourceCollection
     {
-        $sales = $service->getSalesReport($request->validated());
+        $sales = $this->service->getSalesReport($request->validated());
 
         return SaleResource::collection($sales);
     }
