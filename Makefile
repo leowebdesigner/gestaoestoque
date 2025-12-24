@@ -22,7 +22,7 @@ test:
 	docker compose exec app php artisan test
 
 queue:
-	docker compose exec queue php artisan queue:work redis --sleep=1 --tries=3 --timeout=90
+	docker compose exec queue php artisan horizon
 
 schedule:
 	docker compose exec scheduler php artisan schedule:work

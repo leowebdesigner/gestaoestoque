@@ -21,6 +21,7 @@ make init
 
 ## URLs
 - API: `http://localhost:8000`
+- Horizon: `http://localhost:8000/horizon`
 - Adminer (DB): `http://localhost:8080`
 
 ## Credenciais do banco
@@ -53,6 +54,7 @@ make cache-clear
 Containers dedicados:
 - `queue`: worker de filas com Redis
 - `scheduler`: `schedule:work` rodando comandos agendados
+  - Usamos Horizon para monitoramento e execucao das filas.
 
 ## Observacoes
 - `.env` e `.env.example` ja configurados para MySQL + Redis.
