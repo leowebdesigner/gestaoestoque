@@ -4,15 +4,11 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthService
 {
-    private const TOKEN_TTL_DAYS = 7;
-
     public function __construct(
         private readonly UserRepositoryInterface $userRepository
     ) {}
@@ -27,22 +23,8 @@ class AuthService
             ]);
         }
 
-        $cacheKey = 'auth:token:user:' . $user->id;
-        $cachedToken = Cache::get($cacheKey);
-
-        if ($cachedToken) {
-            $existingToken = PersonalAccessToken::findToken($cachedToken);
-
-            if ($existingToken && (int) $existingToken->tokenable_id === (int) $user->id) {
-                return [
-                    'token' => $cachedToken,
-                    'token_type' => 'Bearer',
-                ];
-            }
-        }
-
-        $token = $user->createToken('postman')->plainTextToken;
-        Cache::put($cacheKey, $token, now()->addDays(self::TOKEN_TTL_DAYS));
+        $user->tokens()->delete();
+        $token = $user->createToken('api')->plainTextToken;
 
         return [
             'token' => $token,
@@ -52,9 +34,8 @@ class AuthService
 
     public function logout(?User $user): void
     {
-        if ($user && $user->currentAccessToken()) {
-            Cache::forget('auth:token:user:' . $user->id);
-            $user->currentAccessToken()->delete();
+        if ($user) {
+            $user->tokens()->delete();
         }
     }
 }
