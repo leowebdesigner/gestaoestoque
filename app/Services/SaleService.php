@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\SaleRepositoryInterface;
+use App\Jobs\ProcessSaleJob;
 use App\Models\Sale;
 
 class SaleService
@@ -13,12 +14,16 @@ class SaleService
 
     public function createSale(array $payload): Sale
     {
-        return $this->saleRepository->create([
+        $sale = $this->saleRepository->create([
             'total_amount' => 0,
             'total_cost' => 0,
             'total_profit' => 0,
             'status' => 'pending',
         ]);
+
+        ProcessSaleJob::dispatch($sale->id, $payload['items']);
+
+        return $sale;
     }
 
     public function getSaleById(int $id): ?Sale
