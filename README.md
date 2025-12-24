@@ -80,6 +80,7 @@ make swagger
 - Postman:
   - `docs/postman/CPlug.postman_collection.json`
   - `docs/postman/CPlug.postman_environment.json`
+  - O container do Swagger e usado para abrir a UI localmente sem precisar instalar ferramentas no host.
 
 ## Fila e agendador
 Containers dedicados:
