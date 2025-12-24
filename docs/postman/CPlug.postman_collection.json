@@ -147,7 +147,20 @@
           "mode": "raw",
           "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ]\n}"
         }
-      }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json && json.data && json.data.id) {",
+              "  pm.environment.set('sale_id', json.data.id);",
+              "}"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "Sales - Detail",

@@ -102,7 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiSuccessSale'
+                $ref: '#/components/schemas/ApiSuccessSaleAccepted'
   /api/sales/{id}:
     get:
       tags: [Sales]
@@ -228,6 +228,21 @@ components:
         data:
           $ref: '#/components/schemas/Sale'
       required: [success, message, data]
+    ApiSuccessSaleAccepted:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            status:
+              type: string
+      required: [success, message, data]
     ApiSuccessSaleWithItems:
       type: object
       properties:
@@ -270,7 +285,7 @@ components:
           type: integer
         cost_price:
           type: number
-          format: float
+          format: string
     SaleStoreRequest:
       type: object
       required: [items]
@@ -300,11 +315,13 @@ components:
             name:
               type: string
             cost_price:
-              type: number
-              format: float
+              type: string
+              format: string
+              example: '7.200,00'
             sale_price:
-              type: number
-              format: float
+              type: string
+              format: string
+              example: '5.899,90'
         quantity:
           type: integer
         last_updated:
@@ -318,28 +335,34 @@ components:
           items:
             $ref: '#/components/schemas/InventoryItem'
         total_amount:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '578.190,20'
         total_cost:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '705.600,00'
         total_profit:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '-127.409,80'
     Sale:
       type: object
       properties:
         id:
           type: integer
         total_amount:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '5.899,90'
         total_cost:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '5.200,00'
         total_profit:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '699,90'
         status:
           type: string
         created_at:
@@ -369,8 +392,10 @@ components:
         quantity:
           type: integer
         unit_price:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '5.899,90'
         unit_cost:
-          type: number
-          format: float
+          type: string
+          format: string
+          example: '5.200,00'
