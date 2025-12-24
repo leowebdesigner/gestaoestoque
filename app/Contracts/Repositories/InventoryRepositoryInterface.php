@@ -18,4 +18,6 @@ interface InventoryRepositoryInterface
     public function create(array $data): Inventory;
 
     public function update(Inventory $inventory, array $data): Inventory;
+
+    public function deleteStale(\DateTimeInterface $threshold): int;
 }
