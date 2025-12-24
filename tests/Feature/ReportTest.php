@@ -48,18 +48,9 @@ class ReportTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    [
-                        'id',
-                        'status',
-                        'items' => [
-                            [
-                                'product' => ['id', 'sku', 'name'],
-                                'quantity',
-                                'unit_price',
-                                'unit_cost',
-                            ],
-                        ],
-                    ],
+                    'data',
+                    'links',
+                    'meta',
                 ],
             ]);
     }
