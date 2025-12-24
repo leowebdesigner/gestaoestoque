@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
+use App\Exceptions\InsufficientStockException;
 
 trait HandlesExceptionsTrait
 {
@@ -32,6 +33,8 @@ trait HandlesExceptionsTrait
                 $this->error('Forbidden.', 403),
             $exception instanceof ModelNotFoundException =>
                 $this->error('Resource not found.', 404),
+            $exception instanceof InsufficientStockException =>
+                $this->error($exception->getMessage(), 422),
             $exception instanceof HttpExceptionInterface => $this->error(
                 $exception->getStatusCode() === 404
                     ? 'Resource not found.'
