@@ -1,0 +1,401 @@
+openapi: 3.0.3
+info:
+  title: CPlug ERP - Inventory and Sales API
+  version: 1.0.0
+  description: REST API for inventory and sales management.
+servers:
+  - url: http://localhost:8000
+tags:
+  - name: Auth
+  - name: Inventory
+  - name: Sales
+  - name: Reports
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and get token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessToken'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccess'
+  /api/inventory:
+    get:
+      tags: [Inventory]
+      summary: Get inventory summary (cached)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Inventory summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessInventorySummary'
+    post:
+      tags: [Inventory]
+      summary: Add inventory entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryStoreRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessInventoryItem'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/sales:
+    post:
+      tags: [Sales]
+      summary: Create sale (async)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleStoreRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessSaleAccepted'
+  /api/sales/{id}:
+    get:
+      tags: [Sales]
+      summary: Get sale by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sale details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessSaleWithItems'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/reports/sales:
+    get:
+      tags: [Reports]
+      summary: Sales report
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: product_sku
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessSalesReport'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+      required: [success, message, data]
+    ApiError:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        errors:
+          type: object
+      required: [success, message, errors]
+    ApiSuccessToken:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+            token_type:
+              type: string
+      required: [success, message, data]
+    ApiSuccessInventoryItem:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/InventoryItem'
+      required: [success, message, data]
+    ApiSuccessInventorySummary:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/InventorySummary'
+      required: [success, message, data]
+    ApiSuccessSale:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Sale'
+      required: [success, message, data]
+    ApiSuccessSaleAccepted:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            status:
+              type: string
+      required: [success, message, data]
+    ApiSuccessSaleWithItems:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/SaleWithItems'
+      required: [success, message, data]
+    ApiSuccessSalesReport:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleWithItems'
+      required: [success, message, data]
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    InventoryStoreRequest:
+      type: object
+      required: [sku, quantity]
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+        cost_price:
+          type: number
+          format: string
+    SaleStoreRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [product_id, quantity]
+            properties:
+              product_id:
+                type: integer
+              quantity:
+                type: integer
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        product:
+          type: object
+          properties:
+            id:
+              type: integer
+            sku:
+              type: string
+            name:
+              type: string
+            cost_price:
+              type: string
+              format: string
+              example: '7.200,00'
+            sale_price:
+              type: string
+              format: string
+              example: '5.899,90'
+        quantity:
+          type: integer
+        last_updated:
+          type: string
+          format: date-time
+    InventorySummary:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryItem'
+        total_amount:
+          type: string
+          format: string
+          example: '578.190,20'
+        total_cost:
+          type: string
+          format: string
+          example: '705.600,00'
+        total_profit:
+          type: string
+          format: string
+          example: '-127.409,80'
+    Sale:
+      type: object
+      properties:
+        id:
+          type: integer
+        total_amount:
+          type: string
+          format: string
+          example: '5.899,90'
+        total_cost:
+          type: string
+          format: string
+          example: '5.200,00'
+        total_profit:
+          type: string
+          format: string
+          example: '699,90'
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    SaleWithItems:
+      allOf:
+        - $ref: '#/components/schemas/Sale'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/SaleItem'
+    SaleItem:
+      type: object
+      properties:
+        product:
+          type: object
+          properties:
+            id:
+              type: integer
+            sku:
+              type: string
+            name:
+              type: string
+        quantity:
+          type: integer
+        unit_price:
+          type: string
+          format: string
+          example: '5.899,90'
+        unit_cost:
+          type: string
+          format: string
+          example: '5.200,00'

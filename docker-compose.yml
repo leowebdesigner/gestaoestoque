@@ -1,0 +1,94 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cplug-app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: cplug
+      DB_USERNAME: cplug
+      DB_PASSWORD: cplug
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - mysql
+      - redis
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cplug-queue
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    command: ["php", "artisan", "horizon"]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cplug-scheduler
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    command: ["php", "artisan", "schedule:work"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: cplug-mysql
+    environment:
+      MYSQL_DATABASE: cplug
+      MYSQL_USER: cplug
+      MYSQL_PASSWORD: cplug
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: cplug-redis
+    ports:
+      - "6379:6379"
+
+  adminer:
+    image: adminer:4
+    container_name: cplug-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+  swagger:
+    image: swaggerapi/swagger-ui:v5.17.14
+    container_name: cplug-swagger
+    ports:
+      - "8081:8080"
+    environment:
+      SWAGGER_JSON: /docs/openapi.yaml
+    volumes:
+      - ./docs/openapi.yaml:/docs/openapi.yaml:ro
+
+volumes:
+  mysql_data:
