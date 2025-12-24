@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class InventoryService
 {
@@ -31,6 +32,12 @@ class InventoryService
             }
 
             if (isset($payload['cost_price'])) {
+                if (Money::toCents($payload['cost_price']) > Money::toCents($product->sale_price)) {
+                    throw ValidationException::withMessages([
+                        'cost_price' => ['Cost price cannot be greater than sale price.'],
+                    ]);
+                }
+
                 $this->productRepository->update($product, [
                     'cost_price' => $payload['cost_price'],
                 ]);
@@ -47,6 +54,8 @@ class InventoryService
 
                 Cache::forget(self::CACHE_KEY);
 
+                $updated->load('product');
+
                 return $updated;
             }
 
@@ -57,6 +66,8 @@ class InventoryService
             ]);
 
             Cache::forget(self::CACHE_KEY);
+
+            $created->load('product');
 
             return $created;
         });
