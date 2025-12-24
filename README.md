@@ -10,8 +10,9 @@ API REST para controle de estoque e vendas em ERP
 
 1) Copiar o arquivo de ambiente
 ```bash
-cp .env.example .env
+cp .env.example .env 
 ```
+após por favor recarregue o env digitando comando cd . no terminal
 
 2) Build e subir containers
 ```bash
